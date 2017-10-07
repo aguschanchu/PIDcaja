@@ -1,1 +1,2 @@
-Corrida 9: Había un error en Atune_pde.d no, al mandar el output del 
+Corrida 9: Había un error en Atune_pde.d no, al mandar el output de la
+salida del PID, al Arduino. Faltaba el caso output==0
