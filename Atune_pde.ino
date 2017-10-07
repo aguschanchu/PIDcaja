@@ -108,17 +108,13 @@ void loop()
   {
     int pincalentado = 6;
     int pinenfriado = 5;
-    if (output > 0) {
+    if (output >= 0) {
     analogWrite(pinenfriado,0);
     analogWrite(pincalentado,output);
     }
     if (output < 0) {
     analogWrite(pincalentado,0);
     analogWrite(pinenfriado,-1*output);
-    if (output == 0){
-      analogWrite(pincalentado,0);
-      analogWrite(pinenfriado,0);
-     }
     }
     //Para almacenar el valor de potencia
     Serial.print("[5, ");
