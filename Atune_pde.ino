@@ -7,13 +7,13 @@
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
 
 byte ATuneModeRemember=2;
-double input=25, output=50, setpoint=5;
+double input=25, output=50, setpoint=40;
 // Se obtuvo del autotuneo
 double kp=328.09,ki=2.35,kd=11433.87;
 
 double kpmodel=1.5, taup=100, theta[50];
-double outputStart=-127;
-double aTuneStep=127, aTuneNoise=0.2, aTuneStartValue=-127;
+double outputStart=0;
+double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
 
 boolean tuning = true;

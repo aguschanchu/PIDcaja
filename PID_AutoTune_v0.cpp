@@ -14,7 +14,7 @@ PID_ATune::PID_ATune(double* Input, double* Output)
 	controlType = 1; //Es para que trabaje con PID, en lugar de PI
 	noiseBand = 0.25;
 	running = false;
-	oStep = 127;
+	oStep = 255;
 	SetLookbackSec(10);
 	lastTime = millis();
 }
@@ -50,7 +50,7 @@ int PID_ATune::Runtime()
 		justchanged=false;
 		absMax=refVal;
 		absMin=refVal;
-		setpoint = 5;
+		setpoint = 40;
 		running = true;
 		outputStart = *output;
 		*output = outputStart+oStep;
