@@ -65,9 +65,15 @@ void loop()
     }
     else {
       tempsensor.wake();
-      float c = tempsensor.readTempC();
+      float c;
+      for (int j = 0; j < 10; j++) {
+        c = c + tempsensor.readTempC();
+      }
       tempsensor.shutdown();
-      input = c;
+      input = c/10;
+      Serial.print("[6, ");
+      Serial.print(c);
+      Serial.print("]\n");
     }
   }
 
