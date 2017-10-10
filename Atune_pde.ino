@@ -72,7 +72,7 @@ void loop()
       tempsensor.shutdown();
       input = c/10;
       Serial.print("[6, ");
-      Serial.print(c);
+      Serial.print(input);
       Serial.print("]\n");
     }
   }
