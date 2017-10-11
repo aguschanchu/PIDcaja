@@ -13,5 +13,5 @@ que el sistema de control solicite la temperatura, mida 1 vez, espere 10ms, mida
 al anterior... y así, luego de 10 mediciones, divida por diez y entregue este valor al PID.
 Nuevamente se permitio que el sistema enfríe y caliente, utilizando u Ostep de 255, y setpoint de 40
 
-Corrida 12: Evidentemente el promedio no estaba funcionando en la corrida 12. Se agrego la espera de 10s entre medicion
-y medicion, que... no había sido agregada.
+Corrida 12: Evidentemente el promedio no estaba funcionando en la corrida 12. Se agrego la espera de 100ms entre medicion
+y medicion, que... no había sido agregada. Además, subi el sampletime del PID a 2s
