@@ -68,6 +68,7 @@ void loop()
       float c;
       for (int j = 0; j < 10; j++) {
         c = c + tempsensor.readTempC();
+        delay(10);
       }
       tempsensor.shutdown();
       input = c/10;
