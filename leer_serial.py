@@ -25,6 +25,7 @@ inicio = time.time()
 ultimaModificacionPerturbacion = inicio
 dutyModificacion=False
 voltaje = 0
+inst.write("CH1:VOLTage "+str(voltaje))
 while True:
     #Guardamos los datos que entrega el arduino via serial
     linea = arduino.readline().decode('utf-8')
@@ -39,11 +40,11 @@ while True:
         with open(outputdir+"sensor"+str(linea[0])+".txt",'a') as file:
             file.write(str(linea[1])+','+str(time.time()-inicio)+"\n")
     #Realizamos modificaciones en el perturbador
-    if dutyModificacion == False and (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60*dutyCyclePerturbacion and time.time() > esperaInicial * 60:
+    if dutyModificacion == False and (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60*dutyCyclePerturbacion and (time.time()-inicio) > esperaInicial * 60:
         voltaje = 3
         dutyModificacion = False
         inst.write("CH1:VOLTage "+str(voltaje))
-    if (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60 and time.time() > esperaInicial * 60:
+    if (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60 and (time.time()-inicio) > esperaInicial * 60:
         voltaje = 7
         dutyModificacion = True
         ultimaModificacionPerturbacion = time.time()
