@@ -12,7 +12,7 @@ rm = visa.ResourceManager('@py')
 inst = rm.open_resource("USB0::1155::30016::SPD00002140064::0::INSTR")
 arduino = serial.Serial("/dev/ttyACM0", 9600)
 
-outputdir = "~/Dropbox/ITeDA/Sistema de control/autotune/codigo 1.0/"
+outputdir = "/home/iteda/Dropbox/ITeDA/Sistema de control/autotune/codigo 1.0/"
 periodoPerturbacion=30 #Periodo en minutos
 dutyCyclePerturbacion=0.4 # 0<x<1
 esperaInicial = 60 #La idea es no perturbarlo, mientras hace el autotune, no? En minutos
@@ -39,7 +39,7 @@ while True:
         with open(outputdir+"sensor"+str(linea[0])+".txt",'a') as file:
             file.write(str(linea[1])+','+str(time.time()-inicio)+"\n")
     #Realizamos modificaciones en el perturbador
-    if !dutyModificacion and (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60*dutyCyclePerturbacion and time.time() > esperaInicial * 60:
+    if dutyModificacion == False and (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60*dutyCyclePerturbacion and time.time() > esperaInicial * 60:
         voltaje = 3
         dutyModificacion = False
         inst.write("CH1:VOLTage "+str(voltaje))

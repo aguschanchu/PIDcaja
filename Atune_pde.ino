@@ -16,7 +16,7 @@ double outputStart=0;
 double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
 int temperaturaMaxima=71;
-boolean tuning = false;
+boolean tuning = true;
 unsigned long  modelTime, serialTime;
 
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
