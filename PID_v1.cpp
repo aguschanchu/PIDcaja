@@ -62,12 +62,13 @@ bool PID::Compute()
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
    {
+      double timeChangeS = timeChange/1000;
       /*Compute all the working error variables*/
       double input = *myInput;
       double error = *mySetpoint - input;
       //double dInput = (input - lastInput) / timeChange;
-      double dError = (error - lastError) / timeChange;
-      outputSum+= (ki * error * timeChange);
+      double dError = (error - lastError) / timeChangeS;
+      outputSum+= (ki * error * timeChangeS);
 
       /*Add Proportional on Measurement, if P_ON_M is specified*/
       if(!pOnE) outputSum-= kp * dError;
@@ -81,7 +82,7 @@ bool PID::Compute()
       else output = 0;
 
       /*Compute Rest of PID Output*/
-      output += outputSum - kd * dError;
+      output += outputSum + kd * dError;
 
 	    if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;

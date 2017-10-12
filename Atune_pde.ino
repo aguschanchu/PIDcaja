@@ -9,14 +9,14 @@ Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
 byte ATuneModeRemember=2;
 double input=25, output=50, setpoint=40;
 // Se obtuvo del autotuneo
-double kp=328.09,ki=2.35,kd=11433.87;
+double kp=25.34,ki=0.19,kd=850.99;
 
 double kpmodel=1.5, taup=100, theta[50];
 double outputStart=0;
 double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
 int temperaturaMaxima=71;
-boolean tuning = true;
+boolean tuning = false;
 unsigned long  modelTime, serialTime;
 
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
