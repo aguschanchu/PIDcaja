@@ -15,29 +15,20 @@ double kpmodel=1.5, taup=100, theta[50];
 double outputStart=0;
 double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
-
+int temperaturaMaxima=71;
 boolean tuning = true;
 unsigned long  modelTime, serialTime;
 
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
-PID_ATune aTune(&input, &output);
+PID_ATune aTune(&input, &output, &setpoint);
 
-//set to false to connect to the real world
-boolean useSimulation = false;
 
 void setup()
 {
 
   int pincalentado = 6; // Arduino PWM output pin 6; connect to IBT-2 pin 2 (LPWM)
   pinMode(pincalentado, OUTPUT);
-  if(useSimulation)
-  {
-    for(byte i=0;i<50;i++)
-    {
-      theta[i]=outputStart;
-    }
-    modelTime = 0;
-  }
+
   //Setup the pid
   myPID.SetMode(AUTOMATIC);
 
@@ -57,31 +48,31 @@ void loop()
 {
   unsigned long now = millis();
 
-  if(!useSimulation)
-  { //pull the input in from the real world
-    if (!tempsensor.begin(0x1B)) {
-      Serial.println("Sensor 0x1B no encontrado");
-      while (1);
-    }
-    else {
-      tempsensor.wake();
-      float c;
-      for (int j = 0; j < 10; j++) {
-        c = c + tempsensor.readTempC();
-        delay(100);
-      }
-      tempsensor.shutdown();
-      input = c/10;
-      Serial.print("[6, ");
-      Serial.print(input);
-      Serial.print("]\n");
-    }
+  //pull the input in from the real world
+  if (!tempsensor.begin(0x1B)) {
+    Serial.println("Sensor 0x1B no encontrado");
+    while (1);
   }
+  else {
+    tempsensor.wake();
+    float c;
+    for (int j = 0; j < 10; j++) {
+      c = c + tempsensor.readTempC();
+      delay(100);
+    }
+    tempsensor.shutdown();
+    input = c/10;
+    Serial.print("[6,");
+    Serial.print(input);
+    Serial.print("]\n");
+  }
+
 
   if(tuning)
   {
     byte val = (aTune.Runtime());
     if (val!=0)
+
     {
       tuning = false;
     }
@@ -102,32 +93,29 @@ void loop()
   }
   else myPID.Compute();
 
-  if(useSimulation)
-  {
-    theta[30]=output;
-    if(now>=modelTime)
-    {
-      modelTime +=100;
-      DoModel();
-    }
+
+  int pincalentado = 6;
+  int pinenfriado = 5;
+  //Ejecutamos una funcion que verifique que no se este friendo la caja
+  if (input > temperaturaMaxima) {
+    output=0;
   }
-  else
-  {
-    int pincalentado = 6;
-    int pinenfriado = 5;
-    if (output >= 0) {
-    analogWrite(pinenfriado,0);
-    analogWrite(pincalentado,output);
-    }
-    if (output < 0) {
-    analogWrite(pincalentado,0);
-    analogWrite(pinenfriado,-1*output);
-    }
-    //Para almacenar el valor de potencia
-    Serial.print("[5, ");
-    Serial.print(output);
-    Serial.print("]\n");
+
+  //Aplicamos los cambios del PID
+  if (output >= 0) {
+  analogWrite(pinenfriado,0);
+  analogWrite(pincalentado,output);
   }
+  if (output < 0) {
+  analogWrite(pincalentado,0);
+  analogWrite(pinenfriado,-1*output);
+  }
+
+  //Para almacenar el valor de potencia
+  Serial.print("[5,");
+  Serial.print(output);
+  Serial.print("]\n");
+
 
   //send-receive with processing if it's time
   if(millis()>serialTime)
@@ -137,100 +125,28 @@ void loop()
     serialTime+=500;
   }
 
-  int RPWM_Output = 5; // Arduino PWM output pin 5; connect to IBT-2 pin 1 (RPWM)
-  int LPWM_Output = 6;
-  int intervalo = 10;
-  // Lo siguiente deberia ser reemplazado por un loop
-
-  if (!tempsensor.begin(0x18)) {
-    Serial.println("Sensor 0x18 no encontrado");
-    while (1);
-  }
-  else {
-    tempsensor.wake();
-    float c = tempsensor.readTempC();
-    Serial.print("[0, ");
-    Serial.print(c);
-    Serial.print("]\n");
-    if (c > 70)
-    {
-      analogWrite(LPWM_Output, 0);
-      analogWrite(RPWM_Output, 0);
+  // Enviamos la temperatura del resto de los sensores
+  int numeroDeSensores = 5;
+  for (int sensor = 24; sensor < 24 + numeroDeSensores; sensor++) {
+    if (!tempsensor.begin(sensor)) {
+      Serial.print("Sensor ");
+      Serial.print(sensor-24);
+      Serial.print("no encontrado\n");
+      while (1);
     }
-    tempsensor.shutdown();
-  }
-  delay(10);
-
-  if (!tempsensor.begin(0x19)) {
-    Serial.println("Sensor 0x19 no encontrado");
-    while (1);
-  }
-  else {
-    tempsensor.wake();
-    float c = tempsensor.readTempC();
-    Serial.print("[1, ");
-    Serial.print(c);
-    Serial.print("]\n");
-    if (c > 70)
-    {
-      analogWrite(LPWM_Output, 0);
-      analogWrite(RPWM_Output, 0);
+    else {
+      tempsensor.wake();
+      float c = tempsensor.readTempC();
+      Serial.print("[");
+      Serial.print(sensor-24);
+      Serial.print(",");
+      Serial.print(c);
+      Serial.print("]\n");
+      tempsensor.shutdown();
     }
-    tempsensor.shutdown();
+    delay(10);
   }
-  delay(10);
 
-  if (!tempsensor.begin(0x1A)) {
-    Serial.println("Sensor 0x1A no encontrado");
-    while (1);
-  }
-  else {
-    tempsensor.wake();
-    float c = tempsensor.readTempC();
-    Serial.print("[2, ");
-    Serial.print(c);
-    Serial.print("]\n");
-    if (c > 70)
-    {
-      analogWrite(LPWM_Output, 0);
-      analogWrite(RPWM_Output, 0);
-    }
-    tempsensor.shutdown();
-  }
-  delay(10);
-
-  if (!tempsensor.begin(0x1B)) {
-    Serial.println("Sensor 0x1B no encontrado");
-    while (1);
-  }
-  else {
-    tempsensor.wake();
-    float c = tempsensor.readTempC();
-    Serial.print("[3, ");
-    Serial.print(c);
-    Serial.print("]\n");
-    if (c > 70)
-    {
-      analogWrite(LPWM_Output, 0);
-      analogWrite(RPWM_Output, 0);
-    }
-    tempsensor.shutdown();
-  }
-  delay(10);
-
-  if (!tempsensor.begin(0x1C)) {
-    Serial.println("Sensor 0x1C no encontrado");
-    while (1);
-  }
-  else {
-    tempsensor.wake();
-    float c = tempsensor.readTempC();
-    Serial.print("[4, ");
-    Serial.print(c);
-    Serial.print("]\n");
-    tempsensor.shutdown();
-  }
-  delay(10);
 }
 
 void changeAutoTune()
@@ -297,16 +213,4 @@ void SerialReceive()
     Serial.flush();
     if((b=='1' && !tuning) || (b!='1' && tuning))changeAutoTune();
   }
-}
-
-void DoModel()
-{
-  //cycle the dead time
-  for(byte i=0;i<49;i++)
-  {
-    theta[i] = theta[i+1];
-  }
-  //compute the input
-  input = (kpmodel / taup) *(theta[0]-outputStart) + input*(1-1/taup) + ((float)random(-10,10))/100;
-
 }

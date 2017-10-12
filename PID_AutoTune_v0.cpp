@@ -7,10 +7,11 @@
 #include "PID_AutoTune_v0.h"
 
 
-PID_ATune::PID_ATune(double* Input, double* Output)
+PID_ATune::PID_ATune(double* Input, double* Output, double* Setpoint)
 {
 	input = Input;
 	output = Output;
+  setpoint = *Setpoint;
 	controlType = 1; //Es para que trabaje con PID, en lugar de PI
 	noiseBand = 0.25;
 	running = false;
@@ -50,7 +51,6 @@ int PID_ATune::Runtime()
 		justchanged=false;
 		absMax=refVal;
 		absMin=refVal;
-		setpoint = 40;
 		running = true;
 		outputStart = *output;
 		*output = outputStart+oStep;

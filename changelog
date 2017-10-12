@@ -15,3 +15,12 @@ Nuevamente se permitio que el sistema enfríe y caliente, utilizando u Ostep de 
 
 Corrida 12: Evidentemente el promedio no estaba funcionando en la corrida 12. Se agrego la espera de 100ms entre medicion
 y medicion, que... no había sido agregada. Además, subi el sampletime del PID a 2s
+
+Corrida 13: Se limpió parte del código (aún hay mucho por hacer). Asimismo, se cambio el algoritmo de PID, en el calculador
+de derivadas. Antes, bajo la hipotesis de que siempre corria en forma periódica, cada SampleTime, se "simplificaba"}
+de todas las cuentas el SampleTime (en el calculo de derivada, de DeltaErr/DeltaTiempo). Como esta hipotesis no parece
+ser válida, se agregó un contador de tiempo, para que el DeltaTiempo que se utilice para calcular la dereivada,
+sea lo que tiene que ser.
+Se agrego el leer-serial, así como el graficador al proyecto. Al primero, además de funcionar como datalogger, se agrego
+una interfaz de control con una fuente de DC, a la que están conectadas dos resistencia de 4.7Ohm en serie.
+La idea es replicar las pertubaciones que observabamos en mediciones anteriores, en la temperatura ambiente.

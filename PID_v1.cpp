@@ -65,11 +65,12 @@ bool PID::Compute()
       /*Compute all the working error variables*/
       double input = *myInput;
       double error = *mySetpoint - input;
-      double dInput = (input - lastInput);
-      outputSum+= (ki * error);
+      //double dInput = (input - lastInput) / timeChange;
+      double dError = (error - lastError) / timeChange;
+      outputSum+= (ki * error * timeChange);
 
       /*Add Proportional on Measurement, if P_ON_M is specified*/
-      if(!pOnE) outputSum-= kp * dInput;
+      if(!pOnE) outputSum-= kp * dError;
 
       if(outputSum > outMax) outputSum= outMax;
       else if(outputSum < outMin) outputSum= outMin;
@@ -80,7 +81,7 @@ bool PID::Compute()
       else output = 0;
 
       /*Compute Rest of PID Output*/
-      output += outputSum - kd * dInput;
+      output += outputSum - kd * dError;
 
 	    if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;
@@ -88,6 +89,7 @@ bool PID::Compute()
 
       /*Remember some variables for next time*/
       lastInput = input;
+      lastError = error;
       lastTime = now;
 	    return true;
    }
@@ -110,8 +112,10 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
 
    double SampleTimeInSec = ((double)SampleTime)/1000;
    kp = Kp;
-   ki = Ki * SampleTimeInSec;
-   kd = Kd / SampleTimeInSec;
+   //Antiguamente, el codigo modificaba los Ki y Kd para simplificar
+   //las cuentas. Ver changelog corrida13
+   ki = Ki;
+   kd = Kd;
 
   if(controllerDirection ==REVERSE)
    {
