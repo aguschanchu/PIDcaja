@@ -1,3 +1,6 @@
+Importante: Si hay corridas faltantes, se asume que se utilizó la misma configuración
+anterior, salvo, el setpointo el uso o no de autotunning
+
 Corrida 9: Había un error en Atune_pde.d no, al mandar el output de la
 salida del PID, al Arduino. Faltaba el caso output==0
 
@@ -24,3 +27,5 @@ sea lo que tiene que ser.
 Se agrego el leer-serial, así como el graficador al proyecto. Al primero, además de funcionar como datalogger, se agrego
 una interfaz de control con una fuente de DC, a la que están conectadas dos resistencia de 4.7Ohm en serie.
 La idea es replicar las pertubaciones que observabamos en mediciones anteriores, en la temperatura ambiente.
+
+Corrida16: Se aumentó el número de puntos que se considera en el promedio de 10 med espaciadas 100ms, a 100, espaciadas 50ms

@@ -15,7 +15,7 @@ arduino = serial.Serial("/dev/ttyACM0", 9600)
 outputdir = "/home/iteda/Dropbox/ITeDA/Sistema de control/autotune/codigo 1.0/"
 periodoPerturbacion=30 #Periodo en minutos
 dutyCyclePerturbacion=0.4 # 0<x<1
-esperaInicial = 60 #La idea es no perturbarlo, mientras hace el autotune, no? En minutos
+esperaInicial = 240 #La idea es no perturbarlo, mientras hace el autotune, no? En minutos
 time.sleep(2)
 #Abre el lector serial. El arudino debería strings en el siguiente forato:
 #NSensor, Temp
@@ -42,11 +42,11 @@ while True:
     #Realizamos modificaciones en el perturbador
     if dutyModificacion == False and (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60*dutyCyclePerturbacion and (time.time()-inicio) > esperaInicial * 60:
         voltaje = 3
-        dutyModificacion = False
+        dutyModificacion = True
         inst.write("CH1:VOLTage "+str(voltaje))
     if (time.time() - ultimaModificacionPerturbacion) > periodoPerturbacion*60 and (time.time()-inicio) > esperaInicial * 60:
-        voltaje = 7
-        dutyModificacion = True
+        voltaje = 6
+        dutyModificacion = False
         ultimaModificacionPerturbacion = time.time()
         inst.write("CH1:VOLTage "+str(voltaje))
     #Guardamos el valor del voltaje

@@ -28,40 +28,40 @@ while True:
 
 		trace1 = go.Scatter(
 		    x=res[0][0],
-		    y=res[0][1], 
+		    y=res[0][1],
 		    name="Sensor 0"
 		)
 		trace2 = go.Scatter(
 		    x=res[1][0],
-		    y=res[1][1], 
+		    y=res[1][1],
 		    name="Sensor 1"
 		)
 		trace3 = go.Scatter(
 		    x=res[2][0],
-		    y=res[2][1], 
+		    y=res[2][1],
 		    name="Sensor 2"
 		)
 		trace4 = go.Scatter(
 		    x=res[3][0],
-		    y=res[3][1], 
+		    y=res[3][1],
 		    name="Sensor 3 (control)"
 		)
 
 		trace5 = go.Scatter(
 		    x=res[4][0],
-		    y=res[4][1], 
+		    y=res[4][1],
 		    name="Temperatura ambiente"
 		)
 
 		trace6 = go.Scatter(
 		    x=res[5][0],
-		    y=res[5][1], 
+		    y=res[5][1],
 		    name="Potencia normalizada"
 		)
-				
+
 		trace7 = go.Scatter(
 			x=res[6][0],
-			y=res[6][1], 
+			y=res[6][1],
 			name="Temperatura control promediada"
 		)
 		layout = go.Layout(width=800*2, height=640*2,
