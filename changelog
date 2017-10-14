@@ -29,3 +29,7 @@ una interfaz de control con una fuente de DC, a la que están conectadas dos res
 La idea es replicar las pertubaciones que observabamos en mediciones anteriores, en la temperatura ambiente.
 
 Corrida16: Se aumentó el número de puntos que se considera en el promedio de 10 med espaciadas 100ms, a 100, espaciadas 50ms
+
+Corrida17: Se disminuyó el número de ptos para el premedio, nuevamente a 10, con 100ms de espaciado; dejando el resto de los
+parametros constantes. La idea es, a través de esta medición, la anterior, y la proxima (sin promedio); de evaluar el
+impacto del mismo, y así optar por la configuración definitiva.
