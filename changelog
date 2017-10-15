@@ -36,7 +36,7 @@ impacto del mismo, y así optar por la configuración definitiva.
 
 Corrida19: Se disminuyó el número de ptos para el promedio a 1 (ie, sin promedio). Asimismo, se cambió el código del autotune (pese
 a que en esta corrida, no se utilizó). El autotune utiliza la amplitud y período de las oscilaciones que genera. La amplitud, la mide
-a partir de la diferencia entre el máximo y mínimo de todos los valores que se dan durante el autotuneo. Sin embargo,
+a partir de la diferencia entre el máximo y mínimo global de todos los valores que se dan durante el autotuneo. Sin embargo,
 si el autotuneo comienza de un punto que dista bastante del setpoint, esto hace que la diferencia entre el máximo y mínimo sea enorme,
 y no se corresponde con la amplitud de la oscilación.
 Esta corrección, fue inspirada en las diferencia que había al ejecutar un autotune, entre un caso en donde el setpoint era cercano

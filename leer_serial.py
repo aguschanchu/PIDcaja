@@ -35,6 +35,7 @@ while True:
     try:
     	linea = ast.literal_eval(linea)
     except:
+        linea = ""
     	pass
     if type(linea) == list:
         with open(outputdir+"sensor"+str(linea[0])+".txt",'a') as file:
