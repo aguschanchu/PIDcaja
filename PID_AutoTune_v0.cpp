@@ -40,7 +40,6 @@ int PID_ATune::Runtime()
   //sampleTime=100;
 	Serial.println(sampleTime);
 	if((now-lastTime)<sampleTime) return false;
-  Serial.println("Ajustando");
 	lastTime = now;
 	double refVal = *input;
 	justevaled=true;
@@ -62,23 +61,19 @@ int PID_ATune::Runtime()
 	}
 
 	//oscillate the output base on the input's relation to the setpoint
-	Serial.println(refVal);
-  Serial.println(setpoint);
-  Serial.println(noiseBand);
-	Serial.println(*output);
 	if(refVal>setpoint+noiseBand && *output-oStep > -256) {
 	  *output = outputStart-oStep;
-    Serial.println("Bajando output");
 	}
 	else if (refVal<setpoint-noiseBand && *output+oStep<256) {
 	  *output = outputStart+oStep;
-    Serial.println("Subiendo output");
 	}
-  else {
-    Serial.println("Soy un tibio y no ajuste nada");
-    }
-  Serial.println(*output);
 
+  // Como a veces se utiliza un setpoint de autotuneo distinto al valor inicial, eso da un valor de amplitud incorrecta. Ver changelog, corrida 19
+  // Por eso, medimos la amplitud, a partir de tener dos picos (donde esperamos que el sistema ya se haya estabilizado)
+  if (peakCount>2){
+    absMax=refVal;
+    absMin=refVal;
+  }
 
   //bool isMax=true, isMin=true;
   isMax=true;isMin=true;

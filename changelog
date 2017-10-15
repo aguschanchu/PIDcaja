@@ -28,8 +28,23 @@ Se agrego el leer-serial, así como el graficador al proyecto. Al primero, adem�
 una interfaz de control con una fuente de DC, a la que están conectadas dos resistencia de 4.7Ohm en serie.
 La idea es replicar las pertubaciones que observabamos en mediciones anteriores, en la temperatura ambiente.
 
-Corrida16: Se aumentó el número de puntos que se considera en el promedio de 10 med espaciadas 100ms, a 100, espaciadas 50ms
+Corrida17: Se aumentó el número de puntos que se considera en el promedio de 10 med espaciadas 100ms, a 100, espaciadas 50ms
 
-Corrida17: Se disminuyó el número de ptos para el premedio, nuevamente a 10, con 100ms de espaciado; dejando el resto de los
+Corrida18: Se disminuyó el número de ptos para el premedio, nuevamente a 10, con 100ms de espaciado; dejando el resto de los
 parametros constantes. La idea es, a través de esta medición, la anterior, y la proxima (sin promedio); de evaluar el
 impacto del mismo, y así optar por la configuración definitiva.
+
+Corrida19: Se disminuyó el número de ptos para el promedio a 1 (ie, sin promedio). Asimismo, se cambió el código del autotune (pese
+a que en esta corrida, no se utilizó). El autotune utiliza la amplitud y período de las oscilaciones que genera. La amplitud, la mide
+a partir de la diferencia entre el máximo y mínimo de todos los valores que se dan durante el autotuneo. Sin embargo,
+si el autotuneo comienza de un punto que dista bastante del setpoint, esto hace que la diferencia entre el máximo y mínimo sea enorme,
+y no se corresponde con la amplitud de la oscilación.
+Esta corrección, fue inspirada en las diferencia que había al ejecutar un autotune, entre un caso en donde el setpoint era cercano
+al valor inicial, y otro en donde no. Por ejemplo, un caso particular, se trata de las corridas 12 y 11 respectivamente. Los resultados fueron:
+kp: 324.68 ki: 2.47 kd: 10683.39 (Corrida 12)
+kp: 15.17 ki: 0.11 kd: 514.57 (Corrida 11)
+Análogamente, a temperaturas bajas
+kp: 302.61 ki: 1.08 kd: 21121.99 (Autotuneo con TempInicial=setpoint, corrida eliminada)
+kp: 26.58 ki: 0.08 kd: 2226.92 (Corrida 16)
+La forma de parchear este problema, es, una vez que se haya encontrado dos picos, reinicia el valor de absMax y absMin. Así, mide la amplitud
+de la oscilacion, a partir del 2do pico.
