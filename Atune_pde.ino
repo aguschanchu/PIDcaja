@@ -55,12 +55,12 @@ void loop()
   else {
     tempsensor.wake();
     double c;
-    for (int j = 0; j < 1; j++) {
+    for (int j = 0; j < 500; j++) {
       c = c + tempsensor.readTempC();
-      delay(100);
+      delay(20);
     }
     tempsensor.shutdown();
-    input = c/1;
+    input = c/500;
     Serial.print("[6,");
     Serial.print(input);
     Serial.print("]\n");

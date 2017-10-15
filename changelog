@@ -48,3 +48,5 @@ kp: 302.61 ki: 1.08 kd: 21121.99 (Autotuneo con TempInicial=setpoint, corrida el
 kp: 26.58 ki: 0.08 kd: 2226.92 (Corrida 16)
 La forma de parchear este problema, es, una vez que se haya encontrado dos picos, reinicia el valor de absMax y absMin. Así, mide la amplitud
 de la oscilacion, a partir del 2do pico.
+
+Corrida20: Se aumentó el número de ptos de promedio, a 500, con 20ms de intervalo entre medición
