@@ -51,6 +51,7 @@ int PID_ATune::Runtime()
 		absMax=refVal;
 		absMin=refVal;
 		running = true;
+    estable = false;
 		outputStart = *output;
 		*output = outputStart+oStep;
 	}
@@ -70,9 +71,10 @@ int PID_ATune::Runtime()
 
   // Como a veces se utiliza un setpoint de autotuneo distinto al valor inicial, eso da un valor de amplitud incorrecta. Ver changelog, corrida 19
   // Por eso, medimos la amplitud, a partir de tener dos picos (donde esperamos que el sistema ya se haya estabilizado)
-  if (peakCount>2){
+  if (peakCount>2 && estable == false) {
     absMax=refVal;
     absMin=refVal;
+    estable = true;
   }
 
   //bool isMax=true, isMin=true;
