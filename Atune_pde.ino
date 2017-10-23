@@ -7,7 +7,7 @@
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
 
 byte ATuneModeRemember=2;
-double input=25, output=0, setpoint=5;
+double input=25, output=0, setpoint=40;
 // Se obtuvo del autotuneo
 double kp=302.61,ki=1.08,kd=21121.99;
 
@@ -16,18 +16,29 @@ double outputStart=0;
 double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
 int temperaturaMaxima=71;
-boolean tuning = false;
+boolean tuning = true;
 unsigned long  modelTime, serialTime;
-int pincalentado = 6;
-int pinenfriado = 5;
+int pincalentado = 5;
+int pinenfriado = 6;
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
 PID_ATune aTune(&input, &output, &setpoint);
 
 
 void setup()
 {
+  int pincalentado = 5; // Arduino PWM output pin 5; connect to IBT-2 pin 1 (RPWM)
+  int pinenfriado = 6; // Arduino PWM output pin 6; connect to IBT-2 pin 2 (LPWM)
+  int R_en = 2;
+  int L_en = 1;
   pinMode(pincalentado, OUTPUT);
   pinMode(pinenfriado, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(R_en, OUTPUT);
+  pinMode(L_en, OUTPUT);
+  digitalWrite(R_en, 1);
+  digitalWrite(L_en, 1);
+  digitalWrite(7, 1);
+
   //Setup the pid
   myPID.SetMode(AUTOMATIC);
 
@@ -48,20 +59,20 @@ void loop()
   unsigned long now = millis();
 
   //pull the input in from the real world
-  if (!tempsensor.begin(0x1B)) {
-    Serial.println("Sensor 0x1B no encontrado");
+  if (!tempsensor.begin(0x18)) {
+    Serial.println("Sensor 0x18 no encontrado");
     while (1);
   }
   else {
     tempsensor.wake();
     double c;
-    for (int j = 0; j < 2000; j++) {
+    for (int j = 0; j < 500; j++) {
       c = c + tempsensor.readTempC();
-      delay(10);
+      delay(20);
     }
     tempsensor.shutdown();
-    input = c/2000;
-    Serial.print("[6,");
+    input = c/500;
+    Serial.print("[7,");
     Serial.print(input);
     Serial.print("]\n");
   }
@@ -81,9 +92,21 @@ void loop()
       ki = aTune.GetKi();
       kd = aTune.GetKd();
       Serial.println("Ahi van las salidas del autotune");
-      Serial.println(kp);
-      Serial.println(ki);
-      Serial.println(kd);
+      Serial.print("['p',");
+      Serial.print(kp);
+      Serial.print(",");
+      Serial.print(setpoint);
+      Serial.print("]\n");
+      Serial.print("['i',");
+      Serial.print(ki);
+      Serial.print(",");
+      Serial.print(setpoint);
+      Serial.print("]\n");
+      Serial.print("['d',");
+      Serial.print(kd);
+      Serial.print(",");
+      Serial.print(setpoint);
+      Serial.print("]\n");
       myPID.SetTunings(kp,ki,kd);
       //Agrego un tiempo de control mayor a 0.1s
       myPID.SetSampleTime(1000);
@@ -109,7 +132,7 @@ void loop()
   }
 
   //Para almacenar el valor de potencia
-  Serial.print("[5,");
+  Serial.print("[6,");
   Serial.print(output);
   Serial.print("]\n");
 
@@ -123,7 +146,7 @@ void loop()
   }
 
   // Enviamos la temperatura del resto de los sensores
-  int numeroDeSensores = 5;
+  int numeroDeSensores = 6;
   for (int sensor = 24; sensor < 24 + numeroDeSensores; sensor++) {
     if (!tempsensor.begin(sensor)) {
       Serial.print("Sensor ");

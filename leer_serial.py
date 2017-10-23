@@ -50,7 +50,7 @@ while True:
         ultimaModificacionPerturbacion = time.time()
         inst.write("CH1:VOLTage "+str(voltaje))
     #Guardamos el valor del voltaje
-    with open(outputdir+"sensor"+str(7)+".txt",'a') as file:
+    with open(outputdir+"sensor"+str(8)+".txt",'a') as file:
         file.write(str(voltaje)+','+str(time.time()-inicio)+"\n")
 
 
