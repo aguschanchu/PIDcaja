@@ -13,9 +13,9 @@ inst = rm.open_resource("USB0::1155::30016::SPD00002140064::0::INSTR")
 arduino = serial.Serial("/dev/ttyACM0", 9600)
 
 outputdir = "/home/iteda/Dropbox/ITeDA/Sistema de control/autotune/codigo 1.0/"
-periodoPerturbacion=30 #Periodo en minutos
+periodoPerturbacion=10 #Periodo en minutos
 dutyCyclePerturbacion=0.4 # 0<x<1
-esperaInicial = 240 #La idea es no perturbarlo, mientras hace el autotune, no? En minutos
+esperaInicial = 0 #La idea es no perturbarlo, mientras hace el autotune, no? En minutos
 time.sleep(2)
 #Abre el lector serial. El arudino debería strings en el siguiente forato:
 #NSensor, Temp

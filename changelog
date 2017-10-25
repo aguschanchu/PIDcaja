@@ -51,8 +51,18 @@ de la oscilacion, a partir del 2do pico.
 
 Corrida20: Se aumentó el número de ptos de promedio, a 500, con 20ms de intervalo entre medición
 
-Corrida 21: Se agregó un sensor adicional, y se cambio la diposición de los mismos, utilizando una estructura plástica centrada;
+Corrida 22: Se agregó un sensor adicional, y se cambio la diposición de los mismos, utilizando una estructura plástica centrada;
 para replicar la distribución espacial a la que estará sometida la muestra (a diferencia de los sensores en las esquinas,
 como se encontraba antes). Se utiliza como sensor de control el que se encuentran en el medio (llamado 0, en esta nueva disposición).
 Además, como se había colgado el graficador en la corrida buscadorK 5 (o bien, estaba usando 2GB RAM), se agregó un pequeño código para
 limpiar variables.
+
+Corrida 23: Se realizó una correción en Atune_pde.ino, a la hora de realizar la medición de control. La razón, es que se disminuyó
+la cantidad de puntos que se utiliza en el promedio durante el autotune. La razón, (creemos) es que de ser un número muy grande, fallaba el
+contador de picos, ya que el mismo espera que un punto dado sea mayor a un entorno de puntos, para considerarlo un máximo local (y, por lo
+tanto un extremo de un pico, en lugar de ruido). Si el promedio es muy grande, como cada medición le tomaría más tiempo, esto
+hace que tenga menos puntos entre pico y pico, haciendo que dos de ellos caigan en el entorno de búsqueda de picos, considerando
+a todos como ruido, y por lo tanto, no detectando ninguno.
+
+Corrida 24: El código no fue alterado. No estaba prendido el CH1 de la fuente. Simplemente, a través de python, le enviamos
+inst.write("OUTPut CH1, ON")

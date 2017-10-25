@@ -66,12 +66,23 @@ void loop()
   else {
     tempsensor.wake();
     double c;
-    for (int j = 0; j < 500; j++) {
-      c = c + tempsensor.readTempC();
-      delay(20);
+     if (tuning) {
+      // Hay que tomar menos puntos si promediamos, por el NLoookBack    if (tunning) {
+        for (int j = 0; j < 10; j++) {
+        c = c + tempsensor.readTempC();
+        delay(100);
+      }
+      tempsensor.shutdown();
+      input = c/10;
+      }
+    else {
+      for (int j = 0; j < 500; j++) {
+        c = c + tempsensor.readTempC();
+        delay(20);
+      }
+      tempsensor.shutdown();
+      input = c/500;
     }
-    tempsensor.shutdown();
-    input = c/500;
     Serial.print("[7,");
     Serial.print(input);
     Serial.print("]\n");
