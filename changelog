@@ -66,3 +66,7 @@ a todos como ruido, y por lo tanto, no detectando ninguno.
 
 Corrida 24: El código no fue alterado. No estaba prendido el CH1 de la fuente. Simplemente, a través de python, le enviamos
 inst.write("OUTPut CH1, ON")
+
+Corrida 25: Se cambió leer_serial y Atune_PDE para utilizar el reloj de Arduino (via millis) en lugar de el reloj de Python para almacenar
+los valores de las mediciones de todos los sensores. Asímismo, se implementó una función en Atune_PDE para controlar la resistencia
+cerámica desde Arduino.

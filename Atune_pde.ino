@@ -3,31 +3,39 @@
 #include "PID_v1.h"
 #include "PID_AutoTune_v0.h"
 
+////////Ajustes
+double kp=302.61,ki=1.08,kd=21121.99;
+double setpoint=40;
+int temperaturaMaxima=71;
+boolean tuning = true;
+// Utiliza el resistor como perturbacion
+boolean perturbador = true;
+//Settings del perturbador
+double dutyCyclePerturbacion = 0.4;
+int periodoPerturbacion = 15; //en minutos
+int esperaInicialPerturbado = 60; //Cuanto espera antes de iniciar el perturbador en minutos
+//Settings de los pins del puente H
+int pincalentado = 5;
+int pinenfriado = 6;
+
+////////Fin de ajustes
 // Create the MCP9808 temperature sensor object
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
-
 byte ATuneModeRemember=2;
-double input=25, output=0, setpoint=40;
-// Se obtuvo del autotuneo
-double kp=302.61,ki=1.08,kd=21121.99;
-
-double kpmodel=1.5, taup=100, theta[50];
+double input=25, output=0;
 double outputStart=0;
 double aTuneStep=255, aTuneNoise=0.2, aTuneStartValue=0;
 unsigned int aTuneLookBack=20;
-int temperaturaMaxima=71;
-boolean tuning = true;
+unsigned long ultimoPeriodo = -periodoPerturbacion*60*100;
+unsigned long contadorEsperaInicial = 0;
+bool dutyModificacion = false;
 unsigned long  modelTime, serialTime;
-int pincalentado = 5;
-int pinenfriado = 6;
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
 PID_ATune aTune(&input, &output, &setpoint);
 
 
 void setup()
 {
-  int pincalentado = 5; // Arduino PWM output pin 5; connect to IBT-2 pin 1 (RPWM)
-  int pinenfriado = 6; // Arduino PWM output pin 6; connect to IBT-2 pin 2 (LPWM)
   int R_en = 2;
   int L_en = 1;
   pinMode(pincalentado, OUTPUT);
@@ -57,6 +65,8 @@ void setup()
 void loop()
 {
   unsigned long now = millis();
+  // Reloj en segundos
+  unsigned long tiempo = now/1000;
 
   //pull the input in from the real world
   if (!tempsensor.begin(0x18)) {
@@ -85,6 +95,8 @@ void loop()
     }
     Serial.print("[7,");
     Serial.print(input);
+    Serial.print(",");
+    Serial.print(tiempo)
     Serial.print("]\n");
   }
 
@@ -92,8 +104,13 @@ void loop()
   if(tuning)
   {
     byte val = (aTune.Runtime());
+    //Si esta tuneado, no queremos perturbarlo, de modo que almacenamos
+    //la intencion de hacerlo, en una variable, para despues reactivarlo
+    if (perturbador){
+      bool retenerPerturbador = true;
+      perturbador = false;
+    }
     if (val!=0)
-
     {
       tuning = false;
     }
@@ -102,26 +119,34 @@ void loop()
       kp = aTune.GetKp();
       ki = aTune.GetKi();
       kd = aTune.GetKd();
-      Serial.println("Ahi van las salidas del autotune");
-      Serial.print("['p',");
+      Serial.println("Ahi van las salidas del autotune, como estado");
+
+      Serial.print("['e',");
+      Serial.print(tiempo)
+      Serial.print(",");
       Serial.print(kp);
       Serial.print(",");
-      Serial.print(setpoint);
-      Serial.print("]\n");
-      Serial.print("['i',");
       Serial.print(ki);
       Serial.print(",");
-      Serial.print(setpoint);
-      Serial.print("]\n");
-      Serial.print("['d',");
       Serial.print(kd);
       Serial.print(",");
       Serial.print(setpoint);
+      Serial.print(",");
+      Serial.print("'autotune finalizado, PIDando'");
       Serial.print("]\n");
+
       myPID.SetTunings(kp,ki,kd);
       //Agrego un tiempo de control mayor a 0.1s
       myPID.SetSampleTime(1000);
       AutoTuneHelper(false);
+      //Reactivamos el perturbador en caso de que haya que hacerlo
+      //y reiniciamos el contadorEsperaInicial
+      contadorEsperaInicial=now;
+      if (retenerPerturbador){
+        perturbador=true;
+      }
+
+
     }
   }
   else myPID.Compute();
@@ -145,9 +170,23 @@ void loop()
   //Para almacenar el valor de potencia
   Serial.print("[6,");
   Serial.print(output);
+  Serial.print(",");
+  Serial.print(tiempo)
   Serial.print("]\n");
 
+  // Perturbamos a la caja con el resistor
+  if (perturbador && (now-contadorEsperaInicial)>esperaInicial*60*1000){
+    if ((now-ultimoPeriodo)>=periodoPerturbacion*60*1000){
+      CambiarVoltaje(6);
+      dutyModificacion=false;
+      ultimoPeriodo=now;
+    }
+    elseif ((now-ultimoPeriodo)>=periodoPerturbacion*60*1000*dutyCyclePerturbacion && dutyModificacion == false){
+      CambiarVoltaje(3);
+      dutyModificacion=true;
+    }
 
+  }
   //send-receive with processing if it's time
   if(millis()>serialTime)
   {
@@ -172,6 +211,8 @@ void loop()
       Serial.print(sensor-24);
       Serial.print(",");
       Serial.print(c);
+      Serial.print(",");
+      Serial.print(tiempo)
       Serial.print("]\n");
       tempsensor.shutdown();
     }
@@ -244,4 +285,15 @@ void SerialReceive()
     Serial.flush();
     if((b=='1' && !tuning) || (b!='1' && tuning))changeAutoTune();
   }
+}
+
+void CambiarVoltaje(double voltaje)
+{
+  //Envia el voltaje en voltios al arduino, para que lo cambie en la fuente de DC
+  Serial.print("['v',");
+  Serial.print(voltaje);
+  Serial.print(",");
+  Serial.print(millis()/1000)
+  Serial.print("]\n");
+
 }
