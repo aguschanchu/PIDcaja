@@ -70,3 +70,6 @@ inst.write("OUTPut CH1, ON")
 Corrida 25: Se cambió leer_serial y Atune_PDE para utilizar el reloj de Arduino (via millis) en lugar de el reloj de Python para almacenar
 los valores de las mediciones de todos los sensores. Asímismo, se implementó una función en Atune_PDE para controlar la resistencia
 cerámica desde Arduino.
+
+En preparaciones para corridas con SiPM, se agrego una funcion para calcular los Kes a partir de los datos obtenidos
+de la 5ta corrida de buscadoresK, y un ajuste polinomico via cuadrados minimos
