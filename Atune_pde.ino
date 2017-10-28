@@ -29,7 +29,8 @@ unsigned int aTuneLookBack=20;
 unsigned long ultimoPeriodo = -periodoPerturbacion*60*100;
 unsigned long contadorEsperaInicial = 0;
 bool dutyModificacion = false;
-unsigned long  modelTime, serialTime;
+bool retenerPerturbador = false;
+unsigned long  modelTime, serialTime, now, tiempo;
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
 PID_ATune aTune(&input, &output, &setpoint);
 
@@ -64,9 +65,9 @@ void setup()
 
 void loop()
 {
-  unsigned long now = millis();
+  now = millis();
   // Reloj en segundos
-  unsigned long tiempo = now/1000;
+  tiempo = now/1000;
 
   //pull the input in from the real world
   if (!tempsensor.begin(0x18)) {
@@ -96,7 +97,7 @@ void loop()
     Serial.print("[7,");
     Serial.print(input);
     Serial.print(",");
-    Serial.print(tiempo)
+    Serial.print(tiempo);
     Serial.print("]\n");
   }
 
@@ -107,7 +108,7 @@ void loop()
     //Si esta tuneado, no queremos perturbarlo, de modo que almacenamos
     //la intencion de hacerlo, en una variable, para despues reactivarlo
     if (perturbador){
-      bool retenerPerturbador = true;
+      retenerPerturbador = true;
       perturbador = false;
     }
     if (val!=0)
@@ -122,7 +123,7 @@ void loop()
       Serial.println("Ahi van las salidas del autotune, como estado");
 
       Serial.print("['e',");
-      Serial.print(tiempo)
+      Serial.print(tiempo);
       Serial.print(",");
       Serial.print(kp);
       Serial.print(",");
@@ -171,17 +172,17 @@ void loop()
   Serial.print("[6,");
   Serial.print(output);
   Serial.print(",");
-  Serial.print(tiempo)
+  Serial.print(tiempo);
   Serial.print("]\n");
 
   // Perturbamos a la caja con el resistor
-  if (perturbador && (now-contadorEsperaInicial)>esperaInicial*60*1000){
+  if (perturbador && (now-contadorEsperaInicial)>esperaInicialPerturbado*60*1000){
     if ((now-ultimoPeriodo)>=periodoPerturbacion*60*1000){
       CambiarVoltaje(6);
       dutyModificacion=false;
       ultimoPeriodo=now;
     }
-    elseif ((now-ultimoPeriodo)>=periodoPerturbacion*60*1000*dutyCyclePerturbacion && dutyModificacion == false){
+    if ((now-ultimoPeriodo)>=periodoPerturbacion*60*1000*dutyCyclePerturbacion && dutyModificacion == false){
       CambiarVoltaje(3);
       dutyModificacion=true;
     }
@@ -212,7 +213,7 @@ void loop()
       Serial.print(",");
       Serial.print(c);
       Serial.print(",");
-      Serial.print(tiempo)
+      Serial.print(tiempo);
       Serial.print("]\n");
       tempsensor.shutdown();
     }
@@ -293,7 +294,7 @@ void CambiarVoltaje(double voltaje)
   Serial.print("['v',");
   Serial.print(voltaje);
   Serial.print(",");
-  Serial.print(millis()/1000)
+  Serial.print(millis()/1000);
   Serial.print("]\n");
 
 }

@@ -216,6 +216,47 @@ void PID::SetControllerDirection(int Direction)
    controllerDirection = Direction;
 }
 
+/*  Calculo de Kes *************************************************
+ * Las siguientes funciones calculan los Kes a partir de un ajuste
+ * polinomico (via cuadrados minimos) a los Kes obtenidos en BuscadorK corrida5
+ * via Matlab. A partir de lo realizado en EstudioKes, se consideran
+ * validos en el rango de (tempAmbiente-20,tempAmbiente+30)
+ * Con un ajuste tipo splines, debería poder agrandarse esos límites
+ ******************************************************************************/
+double PID::CalculaKp(double setpoint, double tempAmbiente)
+{
+  double x = setpoint-tempAmbiente;
+  p1 =  -3.071*pow(10,-5);
+  p2 =    0.003512;
+  p3 =     -0.1571;
+  p4 =       4.704;
+  p5 =       309.6;
+  return p1*pow(x+25,4) + p2*pow(x+25,3) + p3*pow(x+25,2) + p4*pow(x+2,1)+p5;
+}
+
+double PID::CalculaKi(double setpoint, double tempAmbiente)
+{
+  double x = setpoint-tempAmbiente;
+  p1 =  -1.122*pow(10,-7);
+  p2 =   2.372*pow(10,-6);
+  p3 =   -0.001407;
+  p4 =      0.1377;
+  p5 =     -0.1292;
+  return p1*pow(x+25,4) + p2*pow(x+25,3) + p3*pow(x+25,2) + p4*pow(x+25,1)+p5;
+}
+
+double PID::CalculaKd(double setpoint, double tempAmbiente)
+{
+  double x = setpoint-tempAmbiente;
+  p1 =      0.0204;
+  p2 =      -3.279;
+  p3 =       197.8;
+  p4 =       -5253;
+  p5 =   6.449*pow(10,4);
+  return p1*pow(x+25,4) + p2*pow(x+25,3) + p3*pow(x+25,2) + p4*pow(x+25,1)+p5;
+}
+
+
 /* Status Funcions*************************************************************
  * Just because you set the Kp=-1 doesn't mean it actually happened.  these
  * functions query the internal state of the PID.  they're here for display

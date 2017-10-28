@@ -50,7 +50,11 @@ class PID
 										  //   once it is set in the constructor.
     void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which
                                           //   the PID calculation is performed.  default is 100
-
+  // Funciones de calibracion
+  double CalculaKp(double, double);
+  double CalculaKi(double, double);
+  double CalculaKd(double, double);
+  double p1, p2, p3, p4, p5, tempAmbiente;
 
 
   //Display functions ****************************************************************
@@ -67,7 +71,7 @@ class PID
 	double dispKi;				//   format for display purposes
 	double dispKd;				//
 
-	double kp;                  // * (P)roportional Tuning Parameter
+	  double kp;                  // * (P)roportional Tuning Parameter
     double ki;                  // * (I)ntegral Tuning Parameter
     double kd;                  // * (D)erivative Tuning Parameter
 
