@@ -5,11 +5,11 @@
 
 ////////Ajustes
 double kp=302.61,ki=1.08,kd=21121.99;
-double setpoint=40;
+double setpoint=5;
 int temperaturaMaxima=71;
-boolean tuning = true;
+boolean tuning = false;
 // Utiliza el resistor como perturbacion
-boolean perturbador = true;
+boolean perturbador = false;
 //Settings del perturbador
 double dutyCyclePerturbacion = 0.4;
 int periodoPerturbacion = 15; //en minutos
@@ -17,7 +17,8 @@ int esperaInicialPerturbado = 60; //Cuanto espera antes de iniciar el perturbado
 //Settings de los pins del puente H
 int pincalentado = 5;
 int pinenfriado = 6;
-
+//Numero del sensor ambiente. Contando desde 0.
+int sensorAmbiente = 5;
 ////////Fin de ajustes
 // Create the MCP9808 temperature sensor object
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
@@ -31,6 +32,20 @@ unsigned long contadorEsperaInicial = 0;
 bool dutyModificacion = false;
 bool retenerPerturbador = false;
 unsigned long  modelTime, serialTime, now, tiempo;
+float ambiente;
+double newSetpoint;
+
+//Utilizado para la comunicacion
+const byte buffSize = 40;
+char inputBuffer[buffSize];
+const char startMarker = '[';
+const char endMarker = ']';
+byte bytesRecvd = 0;
+char messageFromPC[buffSize] = {0};
+boolean readInProgress = false;
+boolean newDataFromPC = false;
+unsigned long prevReplyToPCmillis = 0;
+unsigned long replyToPCinterval = 1000;
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
 PID_ATune aTune(&input, &output, &setpoint);
 
@@ -191,9 +206,16 @@ void loop()
   //send-receive with processing if it's time
   if(millis()>serialTime)
   {
-    SerialReceive();
+    //Esperamos un rato importante, a que se vacie el buffer de la comunicacion serial
+    delay(10*1000);
+    //Enviamos OK a PC, y esperamos respuesta
+    Serial.println("[READY]");
+    delay(1000);
+    getDataFromPC();
+    replyToPC();
+    serialTime+=5*60*1000;
+    delay(5*1000);
     SerialSend();
-    serialTime+=500;
   }
 
   // Enviamos la temperatura del resto de los sensores
@@ -278,16 +300,6 @@ void SerialSend()
   }
 }
 
-void SerialReceive()
-{
-  if(Serial.available())
-  {
-    char b = Serial.read();
-    Serial.flush();
-    if((b=='1' && !tuning) || (b!='1' && tuning))changeAutoTune();
-  }
-}
-
 void CambiarVoltaje(double voltaje)
 {
   //Envia el voltaje en voltios al arduino, para que lo cambie en la fuente de DC
@@ -296,5 +308,96 @@ void CambiarVoltaje(double voltaje)
   Serial.print(",");
   Serial.print(millis()/1000);
   Serial.print("]\n");
+
+}
+
+
+void getDataFromPC() {
+
+    // La paja de enviar cosas al arduino, es que te toma de a bytes
+    // Entonces, es necesario usar delimitadores para enviar mensajes mas largos
+    // Basado en http://forum.arduino.cc/index.php?topic=225329.msg1810764#msg1810764
+
+  if(Serial.available() > 0) {
+
+    char x = Serial.read();
+
+      // the order of these IF clauses is significant
+
+    if (x == endMarker) {
+      readInProgress = false;
+      newDataFromPC = true;
+      inputBuffer[bytesRecvd] = 0;
+      parseData();
+    }
+
+    if(readInProgress) {
+      inputBuffer[bytesRecvd] = x;
+      bytesRecvd ++;
+      if (bytesRecvd == buffSize) {
+        bytesRecvd = buffSize - 1;
+      }
+    }
+
+    if (x == startMarker) {
+      bytesRecvd = 0;
+      readInProgress = true;
+    }
+  }
+}
+
+//=============
+
+void parseData() {
+
+    // split the data into its parts
+
+  char * strtokIndx; // this is used by strtok() as an index
+
+  strtokIndx = strtok(inputBuffer,",");      // get the first part - the string
+  strcpy(messageFromPC, strtokIndx); // copy it to messageFromPC
+
+  strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
+  newSetpoint = atoi(strtokIndx);     // convert this part to an integer
+  //Actulizamos con lo Recibido
+  update();
+}
+
+//=============
+
+void replyToPC() {
+
+  if (newDataFromPC) {
+    newDataFromPC = false;
+    Serial.println("[OK]");
+
+  }
+}
+
+//============
+
+void update() {
+
+   // this illustrates using different inputs to call different functions
+  if (strcmp(messageFromPC, "setpoint") == 0) {
+      // Nos dijeron de cambiar el setpoint, es valido?
+     if (newSetpoint > -1 && newSetpoint < temperaturaMaxima && newSetpoint != setpoint) {
+       setpoint = newSetpoint;
+       // Hay que cambiar las Kes, cual es la temp ambiente?
+      if (!tempsensor.begin(sensorAmbiente+24)) {
+         Serial.print("Sensor ambiente no encontrado\n");
+         while (1);
+       }
+       else {
+         tempsensor.wake();
+         float ambiente = tempsensor.readTempC();
+         tempsensor.shutdown();
+       }
+      kp=myPID.CalculaKp(setpoint,ambiente);
+      ki=myPID.CalculaKi(setpoint,ambiente);
+      kd=myPID.CalculaKd(setpoint,ambiente);
+      myPID.SetTunings(kp,ki,kd);
+   }
+  }
 
 }

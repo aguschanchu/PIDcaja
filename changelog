@@ -72,4 +72,6 @@ los valores de las mediciones de todos los sensores. Asímismo, se implementó u
 cerámica desde Arduino.
 
 En preparaciones para corridas con SiPM, se agrego una funcion para calcular los Kes a partir de los datos obtenidos
-de la 5ta corrida de buscadoresK, y un ajuste polinomico via cuadrados minimos
+de la 5ta corrida de buscadoresK, y un ajuste polinomico via cuadrados minimos. Asimismo, se agregaron funciones
+que permiten la comunicacion con el arduino, para cambiar parametros durante el experimento.
+Unicamente, por ahora, se implemento el poder cambiar el setpoint.
