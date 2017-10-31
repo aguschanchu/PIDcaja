@@ -34,6 +34,7 @@ bool retenerPerturbador = false;
 unsigned long  modelTime, serialTime, now, tiempo;
 float ambiente;
 double newSetpoint;
+bool estabilizado;
 
 //Utilizado para la comunicacion
 // Basado en http://forum.arduino.cc/index.php?topic=396450.0
@@ -218,6 +219,12 @@ void loop()
     newData = false;
   }
 
+  //Cambiamos recientemente el setpoint? De ser asi, hay que reiniciar el PID al acercarse al setpoint, para que el termino integral no se vuelva loco
+  if (!estabilizado && abs(input-setpoint)<0.2) {
+    myPID.Initialize();
+    estabilizado=true;
+  }
+
   // Enviamos la temperatura del resto de los sensores
   int numeroDeSensores = 6;
   for (int sensor = 24; sensor < 24 + numeroDeSensores; sensor++) {
@@ -372,6 +379,7 @@ void update() {
        Serial.println("STOK");
        messageFromPC[1] = 'X';
        floatFromPC=-10;
+       estabilizado=false;
        // Hay que cambiar las Kes, cual es la temp ambiente?
       if (!tempsensor.begin(sensorAmbiente+24)) {
          Serial.print("Sensor ambiente no encontrado\n");
