@@ -36,16 +36,14 @@ float ambiente;
 double newSetpoint;
 
 //Utilizado para la comunicacion
-const byte buffSize = 40;
-char inputBuffer[buffSize];
-const char startMarker = '[';
-const char endMarker = ']';
-byte bytesRecvd = 0;
-char messageFromPC[buffSize] = {0};
-boolean readInProgress = false;
-boolean newDataFromPC = false;
-unsigned long prevReplyToPCmillis = 0;
-unsigned long replyToPCinterval = 1000;
+// Basado en http://forum.arduino.cc/index.php?topic=396450.0
+const byte numChars = 32;
+char receivedChars[numChars];
+char tempChars[numChars];
+char messageFromPC[numChars] = {0};
+float floatFromPC = 0.0;
+boolean newData = false;
+
 PID myPID(&input, &output, &setpoint,kp,ki,kd, DIRECT);
 PID_ATune aTune(&input, &output, &setpoint);
 
@@ -206,16 +204,18 @@ void loop()
   //send-receive with processing if it's time
   if(millis()>serialTime)
   {
-    //Esperamos un rato importante, a que se vacie el buffer de la comunicacion serial
-    delay(10*1000);
-    //Enviamos OK a PC, y esperamos respuesta
-    Serial.println("[READY]");
-    delay(1000);
-    getDataFromPC();
-    replyToPC();
-    serialTime+=5*60*1000;
-    delay(5*1000);
+    serialTime=serialTime+0;
     SerialSend();
+  }
+
+  //Recibimos informacion de la PC
+  recvWithStartEndMarkers();
+  if (newData == true) {
+    strcpy(tempChars, receivedChars);
+        // this temporary copy is necessary to protect the original data
+        //   because strtok() used in parseData() replaces the commas with \0
+    parseData();
+    newData = false;
   }
 
   // Enviamos la temperatura del resto de los sensores
@@ -312,66 +312,52 @@ void CambiarVoltaje(double voltaje)
 }
 
 
-void getDataFromPC() {
+//============
 
-    // La paja de enviar cosas al arduino, es que te toma de a bytes
-    // Entonces, es necesario usar delimitadores para enviar mensajes mas largos
-    // Basado en http://forum.arduino.cc/index.php?topic=225329.msg1810764#msg1810764
+void recvWithStartEndMarkers() {
+    static boolean recvInProgress = false;
+    static byte ndx = 0;
+    char startMarker = '[';
+    char endMarker = ']';
+    char rc;
 
-  if(Serial.available() > 0) {
+    while (Serial.available() > 0 && newData == false) {
+        rc = Serial.read();
 
-    char x = Serial.read();
+        if (recvInProgress == true) {
+            if (rc != endMarker) {
+                receivedChars[ndx] = rc;
+                ndx++;
+                if (ndx >= numChars) {
+                    ndx = numChars - 1;
+                }
+            }
+            else {
+                receivedChars[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+            }
+        }
 
-      // the order of these IF clauses is significant
-
-    if (x == endMarker) {
-      readInProgress = false;
-      newDataFromPC = true;
-      inputBuffer[bytesRecvd] = 0;
-      parseData();
+        else if (rc == startMarker) {
+            recvInProgress = true;
+        }
     }
-
-    if(readInProgress) {
-      inputBuffer[bytesRecvd] = x;
-      bytesRecvd ++;
-      if (bytesRecvd == buffSize) {
-        bytesRecvd = buffSize - 1;
-      }
-    }
-
-    if (x == startMarker) {
-      bytesRecvd = 0;
-      readInProgress = true;
-    }
-  }
 }
 
-//=============
+//============
 
-void parseData() {
+void parseData() {      // split the data into its parts
 
-    // split the data into its parts
+    char * strtokIndx; // this is used by strtok() as an index
 
-  char * strtokIndx; // this is used by strtok() as an index
+    strtokIndx = strtok(tempChars,",");      // get the first part - the string
+    strcpy(messageFromPC, strtokIndx); // copy it to messageFromPC
 
-  strtokIndx = strtok(inputBuffer,",");      // get the first part - the string
-  strcpy(messageFromPC, strtokIndx); // copy it to messageFromPC
-
-  strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
-  newSetpoint = atoi(strtokIndx);     // convert this part to an integer
-  //Actulizamos con lo Recibido
-  update();
-}
-
-//=============
-
-void replyToPC() {
-
-  if (newDataFromPC) {
-    newDataFromPC = false;
-    Serial.println("[OK]");
-
-  }
+    strtokIndx = strtok(NULL, ",");
+    floatFromPC = atof(strtokIndx);     // convert this part to a float
+    update();
 }
 
 //============
@@ -381,8 +367,11 @@ void update() {
    // this illustrates using different inputs to call different functions
   if (strcmp(messageFromPC, "setpoint") == 0) {
       // Nos dijeron de cambiar el setpoint, es valido?
-     if (newSetpoint > -1 && newSetpoint < temperaturaMaxima && newSetpoint != setpoint) {
-       setpoint = newSetpoint;
+     if (floatFromPC > -1 && floatFromPC < temperaturaMaxima && setpoint != floatFromPC) {
+       setpoint = floatFromPC;
+       Serial.println("STOK");
+       messageFromPC[1] = 'X';
+       floatFromPC=-10;
        // Hay que cambiar las Kes, cual es la temp ambiente?
       if (!tempsensor.begin(sensorAmbiente+24)) {
          Serial.print("Sensor ambiente no encontrado\n");
