@@ -33,7 +33,7 @@ bool dutyModificacion = false;
 bool retenerPerturbador = false;
 unsigned long  modelTime, serialTime, now, tiempo;
 float ambiente;
-double newSetpoint;
+double newSetpoint, oldSetpoint;
 bool estabilizado;
 
 //Utilizado para la comunicacion
@@ -220,9 +220,11 @@ void loop()
   }
 
   //Cambiamos recientemente el setpoint? De ser asi, hay que reiniciar el PID al acercarse al setpoint, para que el termino integral no se vuelva loco
-  if (!estabilizado && abs(input-setpoint)<0.1) {
-    myPID.Initialize();
-    estabilizado=true;
+  if (!estabilizado) {
+    if ((oldSetpoint < setpoint && setpoint < input) || (oldSetpoint > setpoint && setpoint > input)) {
+      myPID.Initialize();
+      estabilizado=true;
+  }
   }
 
   // Enviamos la temperatura del resto de los sensores
@@ -375,6 +377,7 @@ void update() {
   if (strcmp(messageFromPC, "setpoint") == 0) {
       // Nos dijeron de cambiar el setpoint, es valido?
      if (floatFromPC > -1 && floatFromPC < temperaturaMaxima && setpoint != floatFromPC) {
+       oldSetpoint = setpoint;
        setpoint = floatFromPC;
        Serial.println("STOK");
        messageFromPC[1] = 'X';

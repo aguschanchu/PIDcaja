@@ -13,7 +13,7 @@ import ast
 import redis
 import traceback
 arduino = serial.Serial("/dev/ttyACM0", 9600)
-outputdir = "/home/iteda/Dropbox/ITeDA/Scripts/Lecroy/resultados/camara/"
+outputdir = "/home/iteda/Dropbox/ITeDA/Scripts/Lecroy/"
 r = redis.StrictRedis(host='localhost', port=30000, db=0)
 
 ############ FIN DE CONFIG
