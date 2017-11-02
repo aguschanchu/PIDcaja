@@ -220,7 +220,7 @@ void loop()
   }
 
   //Cambiamos recientemente el setpoint? De ser asi, hay que reiniciar el PID al acercarse al setpoint, para que el termino integral no se vuelva loco
-  if (!estabilizado && abs(input-setpoint)<0.2) {
+  if (!estabilizado && abs(input-setpoint)<0.1) {
     myPID.Initialize();
     estabilizado=true;
   }
