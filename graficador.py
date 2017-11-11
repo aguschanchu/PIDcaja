@@ -17,7 +17,7 @@ while True:
 	try:
 		dire=''
 		res = []
-		for i in range(0,9):
+		for i in range(0,8):
 			res.append([[],[]])
 			with open(dire+"sensor"+str(i)+".txt",'r') as filem:
 				for line in filem.readlines():
@@ -70,14 +70,9 @@ while True:
 		trace8 = go.Scatter(
 			x=res[7][0],
 			y=res[7][1],
-			name="Sensor 0 promediado (Control)"
+			name="Sensor 1 promediado (Control)"
 		)
 
-		trace9 = go.Scatter(
-			x=res[8][0],
-			y=res[8][1],
-			name="Potencia resistencia"
-		)
 
 		layout = go.Layout(width=800*2, height=640*2,
 			xaxis=dict(
@@ -96,7 +91,7 @@ while True:
 						color='#7f7f7f'
 					))
 			)
-		data = [trace1,trace2,trace3,trace4,trace5,trace6,trace7,trace8,trace9]
+		data = [trace1,trace2,trace3,trace4,trace5,trace6,trace7,trace8]
 		fig = go.Figure(data=data, layout=layout)
 		plot(fig, auto_open=False)
 		print("Graficando")

@@ -5,7 +5,7 @@
 
 ////////Ajustes
 double kp=302.61,ki=1.08,kd=21121.99;
-double setpoint=5;
+double setpoint=12;
 int temperaturaMaxima=71;
 boolean tuning = false;
 // Utiliza el resistor como perturbacion
@@ -84,9 +84,9 @@ void loop()
   tiempo = now/1000;
 
   //pull the input in from the real world
-  if (!tempsensor.begin(0x18)) {
-    Serial.println("Sensor 0x18 no encontrado");
-    while (1);
+  if (!tempsensor.begin(0x19)) {
+    Serial.println("Sensor 0x19 no encontrado");
+    while(1);
   }
   else {
     tempsensor.wake();
@@ -234,8 +234,8 @@ void loop()
       Serial.print("Sensor ");
       Serial.print(sensor-24);
       Serial.print("no encontrado\n");
-      while (1);
-    }
+      while(1);
+      }
     else {
       tempsensor.wake();
       float c = tempsensor.readTempC();
