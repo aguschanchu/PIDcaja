@@ -81,3 +81,5 @@ buena gente, vamos a usar dos scripts de Python. Uno, que haga lo que se le de l
 leer_serial unicamente se encarga de la comunicacion con el arduio, incluyendo envio de mensajes. No solo soluciona el problema del buffer,
 sino, que ademas, hace que la medicion de temperatura sea independiente del osciloscopio, lo que era un problema en la version anterior.
 La comunicación se hace vía redis
+
+Se agrego el codigo de la pantalla, y de los pushbuttons para el control de la temperatura, conectados del siguiente modo:
