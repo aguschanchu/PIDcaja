@@ -5,6 +5,9 @@
 #include "LiquidCrystal_I2C.h"
 
 ////////Ajustes
+//Numero del sensor ambiente. Contando desde 0.
+int sensorAmbiente = 1;
+int numeroDeSensores = 2;
 double kp=302.61,ki=1.08,kd=21121.99;
 double setpoint=12;
 int temperaturaMaxima=71;
@@ -16,10 +19,8 @@ double dutyCyclePerturbacion = 0.4;
 int periodoPerturbacion = 15; //en minutos
 int esperaInicialPerturbado = 60; //Cuanto espera antes de iniciar el perturbador en minutos
 //Settings de los pins del puente H
-int pincalentado = 9;
-int pinenfriado = 10;
-//Numero del sensor ambiente. Contando desde 0.
-int sensorAmbiente = 5;
+int pincalentado = 10;
+int pinenfriado = 9;
 ////////Fin de ajustes
 // Create the MCP9808 temperature sensor object
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
@@ -38,9 +39,9 @@ double newSetpoint, oldSetpoint;
 bool estabilizado;
 //Crear instancia de pantalla y botonera
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
-int cambioe = 2; //Para habilitar y finalizar cambio.
-int temph = 3; //Para subir temperatura
-int templ = 4; //Para bajar temperatura
+int cambioe = 3; //Para habilitar y finalizar cambio.
+int temph = 4; //Para subir temperatura
+int templ = 2; //Para bajar temperatura
 String lineaUno;
 String lineaDos;
 String lineaTres;
@@ -74,7 +75,7 @@ void setup()
   digitalWrite(7, 1);
 	//Preparo botonera
   pinMode(cambioe,INPUT_PULLUP);
-	attachInterrupt(digitalPinToInterrupt(cambioe), cambiarTempAnalogSol, RISING);
+	attachInterrupt(digitalPinToInterrupt(cambioe), cambiarTempAnalogSol, FALLING);
 	pinMode(temph,INPUT_PULLUP);
 	pinMode(templ,INPUT_PULLUP);
 
@@ -140,17 +141,17 @@ void loop()
 	//Actualizamos la pantalla
 	lcd.clear();
 	lcd.setCursor(0,0);
-	lineaUno = "Temp. actual: ";
+	lineaUno = "T. actual: ";
 	lineaUno = lineaUno + input;
-	lineaUno = lineaUno + "°C";
+  lineaUno = lineaUno + " C";
 	lcd.print(lineaUno);
-	lcd.setCursor(1,0);
+	lcd.setCursor(0,1);
 	lineaDos = "Setpoint: ";
 	lineaDos = lineaDos + setpoint;
-	lineaDos = lineaDos + "°C";
+  lineaDos = lineaDos + " C";
 	lcd.print(lineaDos);
 	if (tuning){
-		lcd.setCursor(2,0);
+		lcd.setCursor(0,2);
 		lcd.print("Autotuning en curso");
 	}
 
@@ -266,7 +267,6 @@ void loop()
   }
 
   // Enviamos la temperatura del resto de los sensores
-  int numeroDeSensores = 6;
   for (int sensor = 24; sensor < 24 + numeroDeSensores; sensor++) {
     if (!tempsensor.begin(sensor)) {
       Serial.print("Sensor ");
@@ -364,9 +364,9 @@ void cambiarTempAnalogSol(){
 
 void cambiarTempAnalog() {
 	delay(100);
-	//lcd.clear();
-	//lcd.setCursor(0,0);
-	//lcd.print("Por favor, suelte el boton");
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print("Por favor, suelte el boton");
 	delay(2000);
 	analogUpdate = true;
 	finalizadoAct = false;
@@ -375,35 +375,36 @@ void cambiarTempAnalog() {
 		//Actualizamos la pantalla
 		lcd.clear();
 		lcd.setCursor(0,0);
-		lineaUno = "Temp. actual: ";
+		lineaUno = "Tmp. actual: ";
 		lineaUno = lineaUno + input;
-		lineaUno = lineaUno + "°C";
+		lineaUno = lineaUno + " C";
 		lcd.print(lineaUno);
-		lcd.setCursor(1,0);
-		lineaDos = "Setpoint actual: ";
+		lcd.setCursor(0,1);
+		lineaDos = "Stp. actual: ";
 		lineaDos = lineaDos + setpoint;
-		lineaDos = lineaDos + "°C";
-		lcd.print(lineaDos);
-		lcd.setCursor(2,0);
-		lineaTres = "Setpoint nuevo: ";
+		lineaDos = lineaDos + " C";
+		lcd.print(lineaDos); 
+		lcd.setCursor(0,2);
+		lineaTres = "Stp. nuevo: ";
 		lineaTres = lineaTres + floatFromPC;
-		lineaTres = lineaTres + "°C";
+		lineaTres = lineaTres + " C";
 		lcd.print(lineaTres);
-		lcd.setCursor(3,0);
-		lcd.print("Presione + y - para finalizar");
+		lcd.setCursor(0,3);
+		lcd.print("Prs. + y - para fin.");
     valUno=digitalRead(temph);
     valDos=digitalRead(templ);
-		if (valUno==HIGH){
+    if (valUno == LOW && valDos == LOW){
+      finalizadoAct=true;
+      cambioSolicitado=false;
+    }
+		else if (valUno==LOW){
 			floatFromPC=floatFromPC+1;
 		}
-		else if (valDos==HIGH){
+		else if (valDos==LOW){
 			floatFromPC=floatFromPC-1;
 		}
-		else if (valUno == HIGH && valDos == HIGH){
-			finalizadoAct=true;
-			cambioSolicitado=false;
-		}
-		delay(500);
+		
+		delay(800);
 	}
 	//Llamamos a actualizar el setpoint
 	update();
