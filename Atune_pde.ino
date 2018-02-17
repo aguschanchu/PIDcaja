@@ -7,13 +7,9 @@
 ////////Ajustes
 //Numero del sensor ambiente. Contando desde 0.
 int sensorAmbiente = 1;
-<<<<<<< HEAD
 int sensorControl = 0;
 //Numero natural total de sensores.
 int numeroDeSensores = 6;
-=======
-int numeroDeSensores = 2;
->>>>>>> 252c2c09ff32ffc45edcd50f1622764b0ac44460
 double kp=302.61,ki=1.08,kd=21121.99;
 double setpoint=12;
 int temperaturaMaxima=71;
@@ -389,7 +385,7 @@ void cambiarTempAnalog() {
 		lineaDos = "Stp. actual: ";
 		lineaDos = lineaDos + setpoint;
 		lineaDos = lineaDos + " C";
-		lcd.print(lineaDos); 
+		lcd.print(lineaDos);
 		lcd.setCursor(0,2);
 		lineaTres = "Stp. nuevo: ";
 		lineaTres = lineaTres + floatFromPC;
@@ -409,7 +405,7 @@ void cambiarTempAnalog() {
 		else if (valDos==LOW){
 			floatFromPC=floatFromPC-1;
 		}
-		
+
 		delay(800);
 	}
 	//Llamamos a actualizar el setpoint
