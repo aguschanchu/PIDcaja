@@ -1,0 +1,26 @@
+Funcionamiento normal (inicio)
+
+Directorio del script: ~/Dropbox/ITeDA/Scripts/Arduino/PIDAutoTune/Atune_pde
+Ahí también se encuentra el .ino, en caso que pase algo con el Arduino; o se cambie el número de sensores.
+
+redis-server --port 30000
+python3 ~/Dropbox/ITeDA/Scripts/Arduino/PIDAutoTune/Atune_pde/leer_serial.py
+
+Para cambiar el setpoint:
+
+python3 ~/Dropbox/ITeDA/Scripts/Arduino/PIDAutoTune/Atune_pde/cambiar_temperatura.py -s X -e 1
+
+
+Para cambiar la botonera:
+
+Apretar el boton rojo, y esperar; seguir instrucciones.
+
+
+Para hacer calibración:
+
+Directorio: ~/Dropbox/ITeDA/Scripts/Arduino/BuscadorKs/
+Cargar en el arduino el .ino, y correr el leer_serial.py que está en esa carpeta. Eso arroja distintos archivos kj.txt; que deben
+usarse para realizar un ajuste. Los datos del ajuste, deben modificarse en PID_v1.cpp (del script principal). Las funciones son PID::CalculaKj. El polinomio es de grado 4
+
+
+Ver documentación.

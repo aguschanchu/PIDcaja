@@ -19,6 +19,8 @@ r = redis.StrictRedis(host='localhost', port=30000, db=0)
 ############ FIN DE CONFIG
 if not r.exists('setpoint'):
     print("No existe setpoint en DB, no vamos a cargarlo")
+    lastSetpoint = 12
+
 else:
     lastSetpoint = float(r.get('setpoint').decode('UTF-8'))
 
